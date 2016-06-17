@@ -28,9 +28,11 @@ def     getvar(lib, src):
             if ('include'  in name or 'lib/' in os.path.join(root, name)) :
                 if ('lib/' in os.path.join(root, name)):
                     LIBOK = 1
-                lib.append(name)
+                    if ('include' not in name):
+                        lib.append(name)
+                else :
+                    lib.append(os.path.join(root,name))
     return (LIBOK)
-
 
 def main(av):
     lib = []
@@ -66,7 +68,7 @@ def main(av):
             if (i != 0):
                 file.write("\t")
             if ('include' in name):
-                file.write("-I" + os.path.join(".", name) + "\\\n")
+                file.write("-I" + name + "\\\n")
             else:
                 file.write("-l" + name + "\\\n")
             i += 1
