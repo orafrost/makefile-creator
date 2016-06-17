@@ -53,23 +53,24 @@ def main(av):
         file.write(name)
     file.write("\n")
     file.write("OBJ =\t$(SRC:.c=.o)\n\n")
-    file.write("CFLAGS =")
-    if (FLAG == 1):
-        file.write("-W\\\n\t-Wall\\\n\t-Werror\\\n")
-    if (LIBOK == 1):
+    if (FLAG == 1 or LIBOK == 1 or len(lib) > 0):
+        file.write("CFLAGS =")
         if (FLAG == 1):
-            file.write("\t")
-        file.write("-L./lib\\\n")
-    i = FLAG + LIBOK
-    for name in lib:
-        if (i != 0):
-            file.write("\t")
-        if ('include' in name):
-            file.write("-I" + os.path.join(".", name) + "\\\n")
-        else:
-            file.write("-l" + name + "\\\n")
-    i += 1
-    file.write("\n")
+            file.write("-W\\\n\t-Wall\\\n\t-Werror\\\n")
+        if (LIBOK == 1):
+            if (FLAG == 1):
+                file.write("\t")
+            file.write("-L./lib\\\n")
+        i = FLAG + LIBOK
+        for name in lib:
+            if (i != 0):
+                file.write("\t")
+            if ('include' in name):
+                file.write("-I" + os.path.join(".", name) + "\\\n")
+            else:
+                file.write("-l" + name + "\\\n")
+            i += 1
+        file.write("\n")
     file.write("all:\t $(NAME)\n\n")
     file.write("$(NAME):$(OBJ)\n\tcc -o $(NAME) $(SRC) $(CFLAGS)\n\n")
     file.write("clean:\n\trm -f $(OBJ)\n\n")
