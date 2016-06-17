@@ -34,29 +34,14 @@ def     getvar(lib, src):
                     lib.append(os.path.join(root,name))
     return (LIBOK)
 
-def main(av):
-    lib = []
-    src = []
-    LIBOK = getvar(lib, src)
-    FLAG = 0
-    if (len(av) < 2 or len(av) > 3):
-        print("Usage: ./my_mc \"name exec\" [--flags]")
-        exit (1)
-    if (len(av) == 3 and av[2] != '--flags'):
-        print("Error :  Bad argument " + av[2])
-        exit(1)
-    if (len(av) == 3):
-        FLAG = 1
-    file = open("./Makefile", "w")
-    haider(file, av[1])
-    file.write("NAME =\t" + av[1] + "\n\n")
-    file.write("SRC =")
-    for name in src:
-        file.write(name)
-    file.write("\n")
-    file.write("OBJ =\t$(SRC:.c=.o)\n\n")
-    if (FLAG == 1 or LIBOK == 1 or len(lib) > 0):
-        file.write("CFLAGS =")
+def compilationlib(tp, file, lib):
+    for name in lib:
+        if ('include' not in name):
+            file.write("\t" + tp + " -C " + "./lib/" + name + "\n")
+
+def handflag(file, lib, LIBOK, FLAG):
+        if (FLAG == 1 or LIBOK == 1 or len(lib) > 0):
+            file.write("CFLAGS =")
         if (FLAG == 1):
             file.write("-W\\\n\t-Wall\\\n\t-Werror\\\n")
         if (LIBOK == 1):
@@ -73,10 +58,52 @@ def main(av):
                 file.write("-l" + name + "\\\n")
             i += 1
         file.write("\n")
+
+def source(file, src):
+    file.write("SRC =")
+    for name in src:
+        file.write(name)
+    file.write("\n")
+
+def comp(file, lib):
+    file.write("$(NAME):$(OBJ)\n")
+    compilationlib("make", file, lib)
+    file.write("\tcc -o $(NAME) $(SRC) $(CFLAGS)\n\n")
+
+def clean(file, lib):
+    file.write("clean:\n")
+    compilationlib("make clean", file, lib)
+    file.write("\trm -f $(OBJ)\n\n")
+
+def fclean(file, lib):
+    file.write("fclean:\tclean\n")
+    compilationlib("make fclean", file, lib)
+    file.write("\trm -f $(NAME)\n\n")
+
+
+def main(av):
+    lib = []
+    src = []
+    LIBOK = getvar(lib, src)
+    FLAG = 0
+    if (len(av) < 2 or len(av) > 3):
+        print("Usage: ./my_mc \"name exec\" [--flags]")
+        exit (1)
+    if (len(av) == 3 and av[2] != '--flags'):
+        print("Error :  Bad argument " + av[2])
+        exit(1)
+    if (len(av) == 3):
+        FLAG = 1
+    file = open("./Makefile", "w")
+    haider(file, av[1])
+    file.write("NAME =\t" + av[1] + "\n\n")
+    source(file, src)
+    file.write("OBJ =\t$(SRC:.c=.o)\n\n")
+    handflag(file, lib, LIBOK, FLAG)
     file.write("all:\t $(NAME)\n\n")
-    file.write("$(NAME):$(OBJ)\n\tcc -o $(NAME) $(SRC) $(CFLAGS)\n\n")
-    file.write("clean:\n\trm -f $(OBJ)\n\n")
-    file.write("fclean:\tclean\n\trm -f $(NAME)\n\n")
+    comp(file, lib)
+    clean(file, lib)
+    fclean(file, lib)
     file.write("re:\tfclean all")
     file.close()
     exit(0)
